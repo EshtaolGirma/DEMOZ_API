@@ -32,7 +32,7 @@ python run.py
 
 # Method 2
 
-Set Flask_app variable equals to app.py
+Set Flask_app variable equals to run.py
 
 ```python
 export FLASK_APP=run.py
