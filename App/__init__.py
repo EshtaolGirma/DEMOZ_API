@@ -3,6 +3,7 @@ from flask_restplus import Api
 from flask_sqlalchemy import SQLAlchemy
 
 
+
 app = Flask(__name__)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///Demoz_Database.sqlite'
@@ -19,3 +20,8 @@ api = Api(app, version='1.0', title='Demoz API',
 # from App.Model.Databasemodel import createDatabase
 
 # createDatabase()
+
+
+    
+from App import Controller
+
