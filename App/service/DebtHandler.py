@@ -1,9 +1,12 @@
 from datetime import datetime
 
 from flask_sqlalchemy import SQLAlchemy
+from App.Model.models import saving_plan, saving_deposit
 from App.Model.Databasemodel import DebtsAndLoansRecord, DebtAndLoanTranaction, ContactPerson, IncomeRecord
 from App.Service.ContactLibraryHandler import addNewContactPerson
 from App import db
+
+# Saving Plan Services
 
 
 def GetListOfDebts(user):
@@ -49,7 +52,8 @@ def CreateDebtRecord(user, request):  # created when a user take a loan from oth
         db.session.commit()
 
     except Exception as e:
-        return 'Operation Create Debt Failed', 501
+        # return 'Operation Create Debt Failed', 501
+        return e
 
     return 201
 
@@ -57,10 +61,10 @@ def CreateDebtRecord(user, request):  # created when a user take a loan from oth
 def GetDebtDetail(user, debt):
     try:
         debt = DebtsAndLoansRecord.query.filter_by(
-            user_id=user, id=debt).first()
+            user_id=user, id=debt, debt_or_loan='d').first()
 
         repayments = DebtAndLoanTranaction.query.filter_by(
-            deal_plan_id=debt.id).all()
+            deal_plan_id=debt.id, debt_or_loan='d').all()
         contact = ContactPerson.query.filter_by(
             id=debt.involved_person).first()
 
@@ -102,7 +106,7 @@ def GetDebtDetail(user, debt):
 def DeleteDebt(user, debt):
     try:
         DebtsAndLoansRecord.query.filter_by(
-            user_id=user, id=debt).delete()
+            user_id=user, id=debt, debt_or_loan='d').delete()
         db.session.commit()
     except Exception as e:
         return 'Operation Delete Debt Failed', 501
@@ -113,7 +117,7 @@ def DeleteDebt(user, debt):
 def UpdateDebtDetail(user, debt, request):
     try:
         current_info = DebtsAndLoansRecord.query.filter_by(
-            user_id=user, id=debt).first()
+            user_id=user, id=debt, debt_or_loan='d').first()
 
         if request.json['title'] != '' and current_info.deal_title != request.json['title']:
             current_info.deal_title = request.json['title']
@@ -136,7 +140,8 @@ def UpdateDebtDetail(user, debt, request):
         db.session.commit()
 
     except Exception as e:
-        return 'Operation Update Debt Details Failed', 501
+        # return 'Operation Update Debt Details Failed', 501
+        return e
 
     return GetDebtDetail(user, debt)
 
@@ -146,10 +151,12 @@ def UpdateDebtDetail(user, debt, request):
 
 def CreateDebtRepayment(user, debt, request):
     try:
-        debt_record = DebtsAndLoansRecord.query.filter_by(id=debt).first()
+        debt_record = DebtsAndLoansRecord.query.filter_by(
+            id=debt, debt_or_loan='d').first()
 
         new_repayment = DebtAndLoanTranaction()
         new_repayment.deal_plan_id = debt
+        new_repayment.debt_or_loan = 'd'
         try:
             unpaid_amount = debt_record.initial_amount - debt_record.paid_amount
             new_payment = request.json['returned_amount']
@@ -171,7 +178,8 @@ def CreateDebtRepayment(user, debt, request):
         db.session.add(new_repayment)
         db.session.commit()
     except Exception as e:
-        return 'Operation Create a debt return Failed', 501
+        # return 'Operation Create a debt return Failed', 501
+        return e
 
     return GetDebtDetail(user, debt)
 
@@ -179,10 +187,10 @@ def CreateDebtRepayment(user, debt, request):
 def GetDebtRepaymetDetail(user, debt_repayment):
     try:
         repayment = DebtAndLoanTranaction.query.filter_by(
-            id=debt_repayment).first()
+            id=debt_repayment, debt_or_loan='d').first()
 
         debt = DebtsAndLoansRecord.query.filter_by(
-            id=repayment.deal_plan_id).first()
+            id=repayment.deal_plan_id, debt_or_loan='d').first()
 
     except Exception as e:
         return 'Data not found', 404
@@ -205,7 +213,8 @@ def GetDebtRepaymetDetail(user, debt_repayment):
 
 def DeleteDebtRepayment(user, debt_repayment):
     try:
-        DebtAndLoanTranaction.query.filter_by(id=debt_repayment).delete()
+        DebtAndLoanTranaction.query.filter_by(
+            id=debt_repayment, debt_or_loan='d').delete()
         db.session.commit()
     except Exception as e:
         return 'Operation Delete Debt repayment record Failed', 501
@@ -216,10 +225,10 @@ def DeleteDebtRepayment(user, debt_repayment):
 def UpdateDebtRepaymentDetail(user, debt_repayment, request):
     try:
         current_info = DebtAndLoanTranaction.query.filter_by(
-            id=debt_repayment).first()
+            id=debt_repayment, debt_or_loan='d').first()
 
         debt_record = DebtsAndLoansRecord.query.filter_by(
-            id=current_info.deal_plan_id).first()
+            id=current_info.deal_plan_id, debt_or_loan='d').first()
 
         if request.json['returned_amount'] != 0 and current_info.returned_amount != request.json['returned_amount']:
             try:
@@ -228,6 +237,7 @@ def UpdateDebtRepaymentDetail(user, debt_repayment, request):
                 unpaid_amount = debt_record.initial_amount - debt_record.paid_amount
                 new_payment = request.json['returned_amount']
                 if new_payment <= unpaid_amount:
+                    # return "g"
                     current_info.returned_amount = new_payment
                     debt_record.paid_amount = debt_record.paid_amount + new_payment
                 else:
