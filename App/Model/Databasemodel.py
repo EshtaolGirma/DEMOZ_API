@@ -51,8 +51,8 @@ class DebtsAndLoansRecord(db.Model):
     deal_date = db.Column(db.DateTime, nullable=False)
     involved_person = db.Column(db.Integer, db.ForeignKey(
         ContactPerson.id), nullable=False)
-    initail_amount = db.Column(db.Float, nullable=False)
-    paid_amount = db.Column(db.Float, nullable=False)
+    initial_amount = db.Column(db.Float, nullable=False)
+    paid_amount = db.Column(db.Float, default=0.0)
     debt_or_loan = db.Column(db.Integer, nullable=False)
     db.CheckConstraint(debt_or_loan in ('d', 'l'))
     description = db.Column(db.String(300))
@@ -156,3 +156,13 @@ class IncomeRecord(db.Model):
 
 def createDatabase():
     db.create_all()
+
+
+def importCategories():
+    ListOfCategories = ['Food and Drink', 'Transportation', 'Mobile Pre-paid', 'Fuel', 'Kids',
+                        'Clothes', 'Entrainment', 'Gifts', 'Holidays', 'Health', 'Rentals', 'Sports', 'Shoping']
+    for cat in ListOfCategories:
+        new_cat = Categories(category_name=cat)
+        db.session.add(new_cat)
+
+    db.session.commit()
