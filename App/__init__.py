@@ -17,10 +17,10 @@ api = Api(app, version='1.0', title='Demoz API',
           description='Expense Management API')
 
 
-# from App.Model.Databasemodel import createDatabase, importCategories
+from App.Model.Databasemodel import createDatabase, importCategories
 
-# createDatabase()
-# importCategories()
+createDatabase()
+importCategories()
 
 
     
