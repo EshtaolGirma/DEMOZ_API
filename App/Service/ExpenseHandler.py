@@ -32,14 +32,13 @@ def GetExpensesByCategory(user):
         x_expense = {
             'Amount': expense.spent_amount,
             'Description': expense.description,
-            'Date': {
-                'Day': expense.expense_date.day,
-                'Month': expense.expense_date.month,
-                'Year': expense.expense_date.year,
-            },
-            'With': {
-                'Contacts': people
-            },
+            # 'Date': {
+            'Day': expense.expense_date.day,
+            'Month': expense.expense_date.month,
+            'Year': expense.expense_date.year,
+            # },
+            'With':  people,
+            'Date': str(expense.expense_date.year) + '-' + str(expense.expense_date.month) + '-' + str(expense.expense_date.day),
             'id': expense.id
         }
 
@@ -51,17 +50,24 @@ def GetExpensesByCategory(user):
 def GetExpensesByCategorySummery(user):
     summery_list = GetExpensesByCategory(user)
 
+    result_list = []
+
     cats = Categories.query.all()
 
     for cat in cats:
+        result = {}
         budget = BudgetRecord.query.filter_by(category_id=cat.id).first()
         total = 0
         for i in summery_list[cat.category_name]:
             total += i['Amount']
 
-        summery_list[cat.category_name] = {'Total': total, 'Budget': budget}
+        # summery_list[cat.category_name] = {'Total': total, 'Budget': budget}
+        result['category'] = cat.category_name
+        result['total'] = total
+        result['budget'] = budget
+        result_list.append(result)
 
-    return summery_list, 200
+    return {'summery': result_list}, 200
 
 
 def GetExpensesByCategoryDetail(user, category):
@@ -83,23 +89,25 @@ def GetExpenseDetail(user, expense_id):
 
     people = []
     for person in other_person:
-        info = ContactPerson.query.filter_by(id=person.contact_id).first()
+        info = ContactPerson.query.filter_by(
+            id=person.contact_id, user_id=user).first()
 
         people.append(info.name)
 
     expense_detail = {
-        'Spent Amount': expense.spent_amount,
-        'Category': expense.category_id,
+        'id': expense.id,
+        'Amount': expense.spent_amount,
+        # 'Category': expense.category_id,
         'Description': expense.description,
         'With': people,
-        'Spend On': {
-            'Day': expense.expense_date.day,
-            'Month': expense.expense_date.month,
-            'Year': expense.expense_date.year,
-        },
+
+        'Day': expense.expense_date.day,
+        'Month': expense.expense_date.month,
+        'Year': expense.expense_date.year,
+        'Date': str(expense.expense_date.year) + '-' + str(expense.expense_date.month) + '-' + str(expense.expense_date.day),
     }
 
-    return {'Expense Detail': expense_detail}
+    return {'Expense Detail': [expense_detail]}
 
 
 def CreateNewExpense(user, category, request):
@@ -130,21 +138,19 @@ def UpdateExpense(user, expense, request):
 
         acc_info = SpendingaccompliceRecord.query.filter_by(
             id=expense).first()
-        acc_name = ContactPerson.query.filter_by(
-            id=acc_info.contact_id).first()
 
-        if request.json['spent_amount'] != '' and current_info.spent_amount != request.json['spent_amount']:
+        if request.json['spent_amount'] != 0 and current_info.spent_amount != request.json['spent_amount']:
             current_info.spent_amount = request.json['spent_amount']
 
         if request.json['description'] != '' and current_info.description != request.json['description']:
             current_info.description = request.json['description']
 
-        if request.json['spent_with'] != '' and acc_name.name != request.json['spent_with']:
+        if request.json['spent_with'] != '':
             addExpenseAccomplice(
                 user, request.json['spent_with'].split(','), expense)
 
         if request.json['expense_day'] != "":
-            newdate = datetime.datetime.strptime(
+            newdate = datetime.strptime(
                 request.json['expense_day'], '%Y-%m-%d')
             if current_info.expense_date != newdate:
                 current_info.expense_date = newdate
@@ -152,7 +158,8 @@ def UpdateExpense(user, expense, request):
         db.session.commit()
 
     except Exception as e:
-        return 'Operation Update Expense Details Failed', 501
+        # return 'Operation Update Expense Details Failed', 501
+        return e
 
     return GetExpenseDetail(user, expense)
 

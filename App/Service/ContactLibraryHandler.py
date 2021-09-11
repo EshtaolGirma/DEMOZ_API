@@ -13,16 +13,32 @@ def addNewContactPerson(name, user):
         new_person.name = name
         new_person.user_id = user
 
-        db.session.add(new_photo)
+        db.session.add(new_person)
         db.session.commit()
         new_person = ContactPerson.query.order_by(
             ContactPerson.id.desc()).first()
 
         return new_person.id
 
+# redi codew
+
+
+def removeAccomplice(user, expense):
+    try:
+        contact = ContactPerson.query.filter_by(
+            user_id=user).all()
+
+    except Exception as e:
+        return "e"
+
+    for x in contact:
+        SpendingaccompliceRecord.query.filter_by(
+            contact_id=x.id, expense_id=expense).delete()
+        db.session.commit()
+
 
 def addExpenseAccomplice(user, name_list, expense):
-
+    removeAccomplice(user, expense)
     for name in name_list:
 
         accomplice_id = addNewContactPerson(name, user)

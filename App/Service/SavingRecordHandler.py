@@ -62,34 +62,35 @@ def GetSavingPlanDetail(user, saving_id):
     for deposit in deposits:
         transaction = {
             'Deposited Amount': deposit.deposited_amount,
-            'Deposit Date': {
-                'Day': deposit.transaction_date.day,
-                'Month': deposit.transaction_date.month,
-                'Year': deposit.transaction_date.year,
-            },
+            'Description': deposit.description,
+            'Deposit Date': [
+                deposit.transaction_date.day,
+                deposit.transaction_date.month,
+                deposit.transaction_date.year,
+            ],
             'id': deposit.id
         }
         list_of_deposits.append(transaction)
 
-    result = {'Plan': {
+    result = {'Plan': [{
         'Title': plan.title,
         'Description': plan.description,
         'Goal': plan.goal,
         'Saved Amount': plan.saved_amount,
         'Frequency of Deposit': plan.frequency,
         'Amount to Deposit': plan.one_time_deposit,
-        'Saving Started On': {
-            'Day': plan.starting_date.day,
-            'Month': plan.starting_date.month,
-            'Year': plan.starting_date.year
-        },
-        'Saving Ending On': {
-            'Day': plan.ending_date.day,
-            'Month': plan.ending_date.month,
-            'Year': plan.ending_date.year
-        },
-    },
+        'Saving Started On': [
+            plan.starting_date.day,
+            plan.starting_date.month,
+            plan.starting_date.year
+        ],
+        'Saving Ending On': [
+            plan.ending_date.day,
+            plan.ending_date.month,
+            plan.ending_date.year
+        ],
         'Deposits': list_of_deposits
+    }, ]
     }
 
     return result
@@ -131,13 +132,13 @@ def UpdateSavingPlanDetail(user, saving_id, request):
             current_info.frequency = request.json['frequency']
 
         if request.json['starting_date'] != "":
-            newdate = datetime.datetime.strptime(
+            newdate = datetime.strptime(
                 request.json['starting_date'], '%Y-%m-%d')
             if current_info.starting_date != newdate:
                 current_info.starting_date = newdate
 
         if request.json['ending_date'] != "":
-            newdate = datetime.datetime.strptime(
+            newdate = datetime.strptime(
                 request.json['ending_date'], '%Y-%m-%d')
             if current_info.ending_date != newdate:
                 current_info.ending_date = newdate
@@ -185,11 +186,11 @@ def GetSavingDepositDetail(user, saving_transaction):
     result = {'Transaction': {
         'deposited_amount': transaction.deposited_amount,
         'Description': transaction.description,
-        'Deposited On': {
-            'Day': transaction.transaction_date.day,
-            'Month': transaction.transaction_date.month,
-            'Year': transaction.transaction_date.year
-        },
+        'Deposited On': [
+            transaction.transaction_date.day,
+            transaction.transaction_date.month,
+            transaction.transaction_date.year
+        ],
 
     },
     }

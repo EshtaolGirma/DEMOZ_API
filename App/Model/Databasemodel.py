@@ -4,11 +4,6 @@ from flask_login import UserMixin
 from App import db
 
 
-class PhotoLibrary(db.Model):
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    photo_uri = db.Column(db.String(120), unique=True, nullable=False)
-
-
 class UserRecord(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     full_name = db.Column(db.String(100), unique=True, nullable=False)
@@ -16,7 +11,6 @@ class UserRecord(UserMixin, db.Model):
     income = db.Column(db.Float, default=0.0)
     expense = db.Column(db.Float, default=0.0)
     password = db.Column(db.String(100), nullable=False)
-    avatar = db.Column(db.Integer, db.ForeignKey(PhotoLibrary.id))
 
 
 class ContactPerson(db.Model):
@@ -66,7 +60,7 @@ class RecurringPaymentRecord(db.Model):
     payment_amount = db.Column(db.Float, nullable=False)
     bill_title = db.Column(db.String(50), nullable=False)
     description = db.Column(db.String(300))
-    frequency = db.Column(db.String(10), nullable=False)
+    frequency = db.Column(db.Integer, nullable=False)
     starting_date = db.Column(db.DateTime, nullable=False)
     next_payment_date = db.Column(db.DateTime)
 
@@ -91,6 +85,8 @@ class DebtAndLoanTranaction(db.Model):
         DebtsAndLoansRecord.id), nullable=False)
     returned_amount = db.Column(db.Float, nullable=False)
     transaction_date = db.Column(db.DateTime, nullable=False)
+    debt_or_loan = db.Column(db.Integer, nullable=False)
+    db.CheckConstraint(debt_or_loan in ('d', 'l'))
     description = db.Column(db.String(300))
 
 

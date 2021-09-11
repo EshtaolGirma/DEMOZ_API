@@ -7,7 +7,6 @@ user_model_templet = {
     "Last_Name": fields.String,
     'Email': fields.String,
     'Password': fields.String,
-    'Avatar': fields.String,
 }
 
 
@@ -48,7 +47,7 @@ DebtDeposit_model_templet = {
 Loan_model_templet = {
     'title': fields.String,
     'description': fields.String,
-    'amount_of_debt_taken': fields.Float,
+    'amount_of_loan_given': fields.Float,
     'deal_done_on': fields.Date,
     'borrower': fields.String,
 }

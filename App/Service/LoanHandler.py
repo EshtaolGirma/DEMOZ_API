@@ -68,31 +68,31 @@ def GetLoanDetail(user, loan_id):
     for collection in collections:
         transaction = {
             'Collected Amount': collection.returned_amount,
-            'collection Date': {
-                'Day': collection.transaction_date.day,
-                'Month': collection.transaction_date.month,
-                'Year': collection.transaction_date.year,
-            },
+            'collection Date': [
+                collection.transaction_date.day,
+                collection.transaction_date.month,
+                collection.transaction_date.year,
+            ],
             'id': collection.id
         }
         list_of_collections.append(transaction)
 
-    result = {'loan Detail': {
+    result = {'loan Detail': [{
         'Title': loan.deal_title,
         'Description': loan.description,
         'Brrowed amount': loan.initial_amount,
         'Collected Amount': loan.paid_amount,
         'Borrower': contact.name,
         'Uncollected Amount': loan.initial_amount - loan.paid_amount,
-        'Loan given On': {
-            'Day': loan.deal_date.day,
-            'Month': loan.deal_date.month,
-            'Year': loan.deal_date.year
-        },
+        'Loan given On': [
+            loan.deal_date.day,
+            loan.deal_date.month,
+            loan.deal_date.year
+        ],
 
-    },
-        'loan collection list': list_of_collections
-    }
+
+        'loan collection list': list_of_collections,
+    }]}
 
     return result, 200
 
@@ -116,15 +116,15 @@ def UpdateLoanDetail(user, loan, request):
         if request.json['title'] != '' and current_info.deal_title != request.json['title']:
             current_info.deal_title = request.json['title']
 
-        if request.json['description'] != '' and current_info.descriptions != request.json['description']:
-            current_info.descriptions = request.json['description']
+        if request.json['description'] != '' and current_info.description != request.json['description']:
+            current_info.description = request.json['description']
 
         if request.json['amount_of_loan_given'] != 0 and current_info.initial_amount != request.json['amount_of_loan_given']:
             current_info.initial_amount = request.json['amount_of_loan_given']
 
-        if request.json['borrower'] != '' and current_info.frequency != request.json['borrower']:
+        if request.json['borrower'] != '' and current_info.involved_person != request.json['borrower']:
             loaner = addNewContactPerson(request['borrower'], user)
-            current_info.frequency = loaner
+            current_info.involved_person = loaner
 
         if request.json['deal_done_on'] != "":
             newdate = datetime.datetime.strptime(
@@ -188,11 +188,11 @@ def GetLoanCollectionDetail(user, loan_collection):
         'Loan Title': loan.deal_title,
         'Collected amount': collection.returned_amount,
         'Description': collection.description,
-        'Repaid On': {
-            'Day': collection.transaction_date.day,
-            'Month': collection.transaction_date.month,
-            'Year': collection.transaction_date.year
-        },
+        'Repaid On': [
+            collection.transaction_date.day,
+            collection.transaction_date.month,
+            collection.transaction_date.year
+        ],
 
     },
     }

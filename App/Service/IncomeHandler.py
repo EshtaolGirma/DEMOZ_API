@@ -13,11 +13,11 @@ def GetListOfIncomes(user):
             'Income Amount': i.income_amount,
             'Source': i.category,
             'Description': i.description,
-            'Date': {
-                'Day': i.income_date.day,
-                'Month': i.income_date.month,
-                'Year': i.income_date.year,
-            },
+            'Date': [
+                i.income_date.day,
+                i.income_date.month,
+                i.income_date.year,
+            ],
         }
         retsult.append(income_detail)
 
@@ -41,6 +41,9 @@ def CreateIncome(user, request):
         new_income.income_date = datetime.strptime(
             request.json['date'], '%Y-%m-%d')
 
+        userInfo = UserRecord.query.filter_by(id=user).first()
+        userInfo.income = userInfo.income + new_income.income_amount
+
         db.session.add(new_income)
         db.session.commit()
 
@@ -55,6 +58,8 @@ def UpdateIncome(user, income, request):
         current_info = IncomeRecord.query.filter_by(
             id=income).first()
 
+        userInfo = UserRecord.query.filter_by(id=user).first()
+        userInfo.income = userInfo.income - current_info.income_amount
         if request.json['income_amount'] != 0 and current_info.income_amount != request.json['description']:
             current_info.income_amount = request.json['income_amount']
 
@@ -76,6 +81,8 @@ def UpdateIncome(user, income, request):
                 request.json['date'], '%Y-%m-%d')
             if current_info.income_date != newdate:
                 current_info.income_date = newdate
+
+        userInfo.income = userInfo.income + request.json['income_amount']
 
         db.session.commit()
 
